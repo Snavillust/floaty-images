@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Floating Caricatures</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+    canvas {
+      display: block;
+      background: transparent;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="floatCanvas"></canvas>
+
+  <script>
+    const imagesToLoad = [
+      'caricature1.png',
+      'caricature2.png',
+      'caricature3.png',
+	  'caricature4.png',
+	  'caricature6.png',
+	  'caricature7.png',
+	  'caricature8.png',
+	  'caricature9.png',
+	  'caricature10.png'
+    ];
+
+    const canvas = document.getElementById('floatCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    class Floaty {
+      constructor(imgs, x, y, dx, dy, size) {
+        this.imgs = imgs;
+        this.currentIndex = 0;
+        this.img = imgs[this.currentIndex];
+        this.x = x;
+        this.y = y;
+        this.dx = dx;
+        this.dy = dy;
+        this.size = size;
+        this.angle = 0;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.05;
+      }
+
+      update() {
+        this.x += this.dx;
+        this.y += this.dy;
+        this.angle += this.rotationSpeed;
+
+        let bounced = false;
+
+        if (this.x + this.size > canvas.width || this.x < 0) {
+          this.dx *= -1;
+          bounced = true;
+        }
+
+        if (this.y + this.size > canvas.height || this.y < 0) {
+          this.dy *= -1;
+          bounced = true;
+        }
+
+        if (bounced) {
+          this.currentIndex = (this.currentIndex + 1) % this.imgs.length;
+          this.img = this.imgs[this.currentIndex];
+        }
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x + this.size / 2, this.y + this.size / 2);
+        ctx.rotate(this.angle);
+        ctx.drawImage(this.img, -this.size / 2, -this.size / 2, this.size, this.size);
+        ctx.restore();
+      }
+    }
+
+    function loadImages(paths) {
+      return Promise.all(paths.map(path => new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('Failed to load: ' + path));
+        img.src = path;
+      })));
+    }
+
+    loadImages(imagesToLoad).then(images => {
+      const size = 150;
+      const floaty = new Floaty(
+        images,
+        Math.random() * (canvas.width - size),
+        Math.random() * (canvas.height - size),
+        (Math.random() - 0.5) * 3.0,
+        (Math.random() - 0.5) * 3.0,
+        size
+      );
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        floaty.update();
+        floaty.draw();
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    }).catch(err => {
+      ctx.fillStyle = 'white';
+      ctx.font = '24px sans-serif';
+      ctx.fillText('Image load error. Check console.', 30, 50);
+      console.error(err);
+    });
+  </script>
+</body>
+</html>
