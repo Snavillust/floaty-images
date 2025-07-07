@@ -35,5 +35,16 @@ Open `floating.html` and scroll to around **line 22**. Update the image list lik
     'img3.png'
   ];
 </script>
+```
 
-Make sure the image filenames match exactly, and all images are in the same folder as the HTML file.
+Using in OBS
+
+Open OBS
+
+Add a Browser Source
+
+Check “Local File”
+
+Select your floating.html file
+
+Set resolution (e.g. 1920x1080)
